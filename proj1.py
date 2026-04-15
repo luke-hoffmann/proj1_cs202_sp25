@@ -95,3 +95,15 @@ region_conditions = [major_metro,second_major_metro,south_china_sea,cal_poly]
 # > - ~5% for latitude/longitude  
 # > - Factor of 10 for population or emissions  
 # > Don’t spend more than 5–10 minutes researching numbers.
+
+
+def emissions_per_capita(rc: RegionCondition)-> float:
+    # Takes a `RegionCondition` and returns the tons of CO₂-equivalent **emitted per person** in the region per year. Avoid division by zero — return `0.0` if population is zero.
+    # Inputs:
+    #   rc: RegionCondition -> the RegionCondition that the function will evaluate
+    # Outputs:
+    #   float -> a float that indicates the tons of CO₂-equivalent emitted per person in the region per year
+    #         -> returns 0 if the population in the region is 0
+    pop: int = rc.pop
+    if (pop==0): return 0.0
+    return rc.ghg_rate/pop
