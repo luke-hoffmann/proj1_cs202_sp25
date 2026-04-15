@@ -49,3 +49,11 @@ class Region:
     terrain: str # a string representing the terrain type — one of: ocean, mountains, forest, or other
     
 
+@dataclass(frozen=True)
+class RegionCondition:
+    # Describes the current state of a region in a specific year.
+    
+    region: Region # a `Region` object
+    year: int # the year of observation (as an integer)
+    pop: int # the population in that year (as an integer)
+    ghg_rate: float # the greenhouse gas emissions for that year (as a float, in tons of CO₂-equivalent per year)
