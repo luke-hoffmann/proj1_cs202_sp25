@@ -40,3 +40,12 @@ class GlobeRect:
             
 
 
+@dataclass(frozen=True)
+class Region:
+    # Describes the identity and terrain of a region.
+    
+    rect: GlobeRect # a `GlobeRect` object describing the physical boundaries
+    name: str # a string with the name of the region (e.g., `"Tokyo"`)
+    terrain: str # a string representing the terrain type — one of: ocean, mountains, forest, or other
+    
+
