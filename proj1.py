@@ -158,3 +158,5 @@ def densest_recursive(rc_list: list[RegionCondition], highest_density : float,hi
         highest_density = current_density
     return densest_recursive(rc_list,highest_density,highest_density_index,index+1)
 
+def project_condition(rc : RegionCondition, years: int):
+    pass
