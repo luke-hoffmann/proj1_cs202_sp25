@@ -122,3 +122,13 @@ def area(gr: GlobeRect)-> float:
     long_term = abs(long_term*DEGREES_TO_RADIANS)
     
     return (EARTH_RADIUS**2) * long_term  * lat_term
+
+def emissions_per_square_km(rc: RegionCondition)->float:
+    # Takes a `RegionCondition` and returns the tons of CO₂-equivalent per square kilometer.
+    # Inputs:
+    #   rc: RegionCondition -> the RegionCondition used to calculate the number of tons of CO2 per square kilometer
+    # Outputs:
+    #   float -> a float equivalent to the number of tons of CO2 equivalent released per square kilometer in the given RegionCondition 
+    a = area(rc.region.rect)
+    if (a == 0): return 0
+    return rc.ghg_rate / a
