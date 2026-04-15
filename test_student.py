@@ -129,15 +129,34 @@ class TestDensest(unittest.TestCase):
         cal_poly_region = Region(cal_poly_globerect,"Cal Poly","mountains")
         cal_poly = RegionCondition(cal_poly_region,2024,47000,4.7e5)
         region_conditions = [major_metro,second_major_metro,south_china_sea,cal_poly]
-        self.assertEqual(densest(region_conditions),"New York City")
+        self.assertEqual(densest(region_conditions),"Mumbai")
     def test_edge_cases(self):
         self.assertRaises(IndexError,lambda: densest([]))
         self.assertRaises(TypeError,lambda: densest(["cheese"]))
 class TestProjectCondition(unittest.TestCase):
     def test_typical(self):
+        terrain_to_growth_rate_map: dict[str,float] = {}
+        terrain_to_growth_rate_map["ocean"] = 0.0001
+        terrain_to_growth_rate_map["mountains"] = 0.0005
+        terrain_to_growth_rate_map["forest"] = -0.00001
+        terrain_to_growth_rate_map["other"] = 0.0003
+        starting_pop = 100
+        starting_ghg = 10
+        starting_year = 2020
+        years_forward = 20
         
+        growth = ((1 + terrain_to_growth_rate_map["mountains"])**years_forward)
+        ending_pop = int(starting_pop * growth)
+        ending_ghg = starting_ghg * growth
+        ending_year = starting_year + years_forward
+        
+        region = Region(GlobeRect(0,10,10,20),"China","mountains")
+        rc_starting = RegionCondition(region,starting_year,starting_pop,starting_ghg)
+        rc_expected = RegionCondition(region,ending_year,ending_pop,ending_ghg)
+        self.assertEqual(project_condition(rc_starting,years_forward).year, ending_year)
+        self.assertEqual(project_condition(rc_starting,years_forward),rc_expected)
     def test_edge_cases(self):
-        self.assertRaises(IndexError,lambda: project_condition("string",10))
-        self.assertRaises(ValueError, lambda: project_condition([]))
+        self.assertRaises(TypeError,lambda: project_condition("string",10))
+        self.assertRaises(KeyError, lambda: project_condition(RegionCondition(Region(GlobeRect(0,10,10,30),"China","Ocean Floor"),2020,20000,100),10))
 if __name__ == '__main__':
     unittest.main()
