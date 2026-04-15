@@ -150,9 +150,10 @@ def densest_recursive(rc_list: list[RegionCondition], highest_density : float,hi
         return highest_density_index
     if (not isinstance(rc_list[index],RegionCondition)): raise TypeError
     if (len(rc_list) ==0): raise IndexError
-    current_density = rc_list[index].pop / emissions_per_square_km(rc_list[index])
+    current_density = rc_list[index].pop / area(rc_list[index].region.rect)
     if (current_density > highest_density): 
         highest_density = current_density
+        highest_density_index = index
     return densest_recursive(rc_list,highest_density,highest_density_index,index+1)
 
 def project_condition(rc : RegionCondition, years: int):
