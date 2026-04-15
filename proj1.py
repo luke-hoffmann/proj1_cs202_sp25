@@ -57,3 +57,41 @@ class RegionCondition:
     year: int # the year of observation (as an integer)
     pop: int # the population in that year (as an integer)
     ghg_rate: float # the greenhouse gas emissions for that year (as a float, in tons of CO₂-equivalent per year)
+    
+    
+    
+    
+# Create **four instances** of `RegionCondition`. These will be used to test your functions in later tasks.
+
+# Your list must include:
+# 1. A major metropolitan area from anywhere in the world
+# 2. A second major metro from a different continent
+# 3. A substantial ocean region (not a whole ocean)
+# 4. A region that includes Cal Poly, but excludes:
+#    - San Jose
+#    - Santa Barbara
+#    - Bakersfield
+#    - and too much ocean
+
+
+major_metro_globerect = GlobeRect(40.460702,40.943033,-74.379615,-73.709381)
+
+major_metro_region = Region(major_metro_globerect,"New York City", "other")
+major_metro = RegionCondition(major_metro_region,2024,8584629,78740000)
+
+second_major_metro_globerect = GlobeRect(18.874808,19.274153,72.711445,72.977678)
+second_major_metro_region = Region(second_major_metro_globerect,"Mumbai", "other")
+second_major_metro = RegionCondition(second_major_metro_region,2024,25300000,5.6e7)
+
+south_china_sea_globerect = GlobeRect(12.061978,18.038351,117.376528,110.967700)
+south_china_sea_region = Region(south_china_sea_globerect,"South China Sea", "ocean")
+south_china_sea = RegionCondition(south_china_sea_region,2024,0,2.0e10)
+
+cal_poly_globerect = GlobeRect(35.238162,35.324984,-120.609130,-120.710445,)
+cal_poly_region = Region(cal_poly_globerect,"Cal Poly","mountains")
+cal_poly = RegionCondition(cal_poly_region,2024,47000,4.7e5)
+region_conditions = [major_metro,second_major_metro,south_china_sea,cal_poly]
+# > Use rough estimates. Approximate within:
+# > - ~5% for latitude/longitude  
+# > - Factor of 10 for population or emissions  
+# > Don’t spend more than 5–10 minutes researching numbers.
