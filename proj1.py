@@ -155,6 +155,19 @@ def densest_recursive(rc_list: list[RegionCondition], highest_density : float,hi
         highest_density = current_density
         highest_density_index = index
     return densest_recursive(rc_list,highest_density,highest_density_index,index+1)
+terrain_to_growth_rate_map: dict[str,float] = {}
+terrain_to_growth_rate_map["ocean"] = 0.0001
+terrain_to_growth_rate_map["mountains"] = 0.0005
+terrain_to_growth_rate_map["forest"] = -0.00001
+terrain_to_growth_rate_map["other"] = 0.0003
+def project_condition(rc : RegionCondition, years: int)->RegionCondition:
+    if not isinstance(rc,RegionCondition): raise TypeError
+    growth_multiplier = growth(terrain_to_growth_rate_map,rc.region.terrain,years)
+    pop = int(rc.pop * growth_multiplier)
+    ghg = rc.ghg_rate * growth_multiplier
+    return RegionCondition(rc.region.copy(),rc.year+years,pop,ghg)
 
-def project_condition(rc : RegionCondition, years: int):
-    pass
+def growth(growth_rate_map: dict[str,float], terrain: str, years: int)->float:
+    if not terrain in growth_rate_map: raise KeyError
+    growth_rate = growth_rate_map[terrain]
+    return (1+growth_rate) ** years
