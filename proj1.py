@@ -2,7 +2,8 @@
 import sys
 from dataclasses import dataclass
 from math import pi, inf, sin,isfinite
-from typing import Any
+from typing import Any, Self
+
 import numbers
 sys.setrecursionlimit(10**6)
 DEGREES_TO_RADIANS: float = pi / 180
@@ -11,6 +12,7 @@ def assertFinite(x : Any)->None:
     if not isinstance(x, numbers.Real): raise TypeError
     if isinstance(x,bool): raise TypeError
     if not isfinite(x): raise ValueError
+
 @dataclass(frozen=True)
 class GlobeRect:
     # Represents a rectangular region of the globe.
@@ -32,14 +34,9 @@ class GlobeRect:
         if abs(self.east_long) >180: error_message+=("east_long must be between -180 and 180")
         if self.lo_lat > self.hi_lat: error_message+=("the lower latitude is higher that the upper latitude")
         if (len(error_message) > 0): raise ValueError(error_message)
+    def copy(self)->Self:
+        return type(self)(self.lo_lat,self.hi_lat,self.west_long,self.east_long)
         
-        
-        
-        
-        
-            
-
-
 @dataclass(frozen=True)
 class Region:
     # Describes the identity and terrain of a region.
@@ -48,7 +45,8 @@ class Region:
     name: str # a string with the name of the region (e.g., `"Tokyo"`)
     terrain: str # a string representing the terrain type — one of: ocean, mountains, forest, or other
     
-
+    def copy(self)->Self:
+        return type(self)(self.rect.copy(),self.name,self.terrain)
 @dataclass(frozen=True)
 class RegionCondition:
     # Describes the current state of a region in a specific year.
@@ -57,9 +55,8 @@ class RegionCondition:
     year: int # the year of observation (as an integer)
     pop: int # the population in that year (as an integer)
     ghg_rate: float # the greenhouse gas emissions for that year (as a float, in tons of CO₂-equivalent per year)
-    
-    
-    
+    def copy(self)->Self:
+        return type(self)(self.region.copy(),self.year,self.pop,self.ghg_rate)
     
 # Create **four instances** of `RegionCondition`. These will be used to test your functions in later tasks.
 
