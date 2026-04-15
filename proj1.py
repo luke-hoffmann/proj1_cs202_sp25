@@ -132,3 +132,29 @@ def emissions_per_square_km(rc: RegionCondition)->float:
     a = area(rc.region.rect)
     if (a == 0): return 0
     return rc.ghg_rate / a
+def densest(rc_list : list[RegionCondition])->str:
+    # Takes a list of RegionConditions and returns the name of the region with the highest population density.
+    # Inputs:
+    #   rc_list: list[RegionCondition] -> a list of Region Conditions to be evaluated for the highest population density
+    # Outputs:
+    #   str -> the name of the Region with the highest population density.
+    if (len(rc_list) ==0): raise IndexError
+    return rc_list[densest_recursive(rc_list, -inf, 0, 0)].region.name
+def densest_recursive(rc_list: list[RegionCondition], highest_density : float,highest_density_index: int, index : int)-> int:
+    # Evaluates a list of RegionConditions to find which RegionCondition has the highest population density. Takes a list of RegionConditions, the current densest_density, the index of the Region Condition with the highest density, and the current index of the list to compare the highest density to.
+    # Inputs:
+    #   rc_list: list[RegionCondition] -> the list of   RegionConditions to find the highest population density from
+    #   highest_density: float -> the current highest population density found in the list up to index-1
+    #   highest_density_index: int -> the index of the current RegionCondition with the highest population density up until index-1
+    #   index: int -> the index of the element in rc_list that will be compared against the highest_density to see if this element actually has the highest population density
+    # Outputs:
+    #   int -> the index of the RegionCondition in rc_list that has the highest population density
+    if (index >= len(rc_list)): 
+        return highest_density_index
+    if (not isinstance(rc_list[index],RegionCondition)): raise TypeError
+    if (len(rc_list) ==0): raise IndexError
+    current_density = rc_list[index].pop / emissions_per_square_km(rc_list[index])
+    if (current_density > highest_density): 
+        highest_density = current_density
+    return densest_recursive(rc_list,highest_density,highest_density_index,index+1)
+
