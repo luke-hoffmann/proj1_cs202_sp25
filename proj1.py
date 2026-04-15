@@ -107,3 +107,18 @@ def emissions_per_capita(rc: RegionCondition)-> float:
     pop: int = rc.pop
     if (pop==0): return 0.0
     return rc.ghg_rate/pop
+
+def area(gr: GlobeRect)-> float:
+    # Calculate the estimated surface area of the region in square kilometers.
+    # Inputs:
+    #   gr: GlobeRect -> the GlobeRectangle that the function will use to calculate the square kilometers
+    # Outputs:
+    #   float -> a float that is equivalent to the number of square kilometers inside of the GlobeRect that was passed as an input
+    
+    
+    long_term: float =  gr.east_long - gr.west_long
+    lat_term: float = abs(sin(gr.hi_lat * DEGREES_TO_RADIANS) - sin(gr.lo_lat * DEGREES_TO_RADIANS))
+    if (long_term < 0): long_term += 360
+    long_term = abs(long_term*DEGREES_TO_RADIANS)
+    
+    return (EARTH_RADIUS**2) * long_term  * lat_term
