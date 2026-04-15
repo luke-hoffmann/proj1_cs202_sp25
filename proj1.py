@@ -80,11 +80,11 @@ second_major_metro_globerect = GlobeRect(18.874808,19.274153,72.711445,72.977678
 second_major_metro_region = Region(second_major_metro_globerect,"Mumbai", "other")
 second_major_metro = RegionCondition(second_major_metro_region,2024,25300000,5.6e7)
 
-south_china_sea_globerect = GlobeRect(12.061978,18.038351,117.376528,110.967700)
+south_china_sea_globerect = GlobeRect(12.061978,18.038351,110.967700,117.376528)
 south_china_sea_region = Region(south_china_sea_globerect,"South China Sea", "ocean")
 south_china_sea = RegionCondition(south_china_sea_region,2024,0,2.0e10)
 
-cal_poly_globerect = GlobeRect(35.238162,35.324984,-120.609130,-120.710445,)
+cal_poly_globerect = GlobeRect(35.238162,35.324984,-120.710445,-120.609130)
 cal_poly_region = Region(cal_poly_globerect,"Cal Poly","mountains")
 cal_poly = RegionCondition(cal_poly_region,2024,47000,4.7e5)
 region_conditions = [major_metro,second_major_metro,south_china_sea,cal_poly]
