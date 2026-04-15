@@ -1,4 +1,12 @@
 #complete your tasks in this file
+import sys
+from dataclasses import dataclass
+from math import pi, inf, sin,isfinite
+from typing import Any
+import numbers
+sys.setrecursionlimit(10**6)
+DEGREES_TO_RADIANS: float = pi / 180
+EARTH_RADIUS: float = 6378.1 # km
 def assertFinite(x : Any)->None:
     if not isinstance(x, numbers.Real): raise TypeError
     if isinstance(x,bool): raise TypeError
