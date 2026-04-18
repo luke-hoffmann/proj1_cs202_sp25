@@ -9,10 +9,34 @@ sys.setrecursionlimit(10**6)
 DEGREES_TO_RADIANS: float = pi / 180
 EARTH_RADIUS: float = 6378.1 # km
 def assertFiniteFloat(x : Any)->None:
+    # Verifies that x is a finite float-like numeric value.
+    # Inputs:
+    #   x: Any -> the value to validate as a finite float-like number
+    # Outputs:
+    #   None -> returns nothing if x is valid
+    # Preconditions:
+    #   x should be intended to represent a numeric value
+    # Postconditions:
+    #   the function either finishes with no return value or raises an error
+    # Examples:
+    #   assertFiniteFloat(3.5) returns None
+    #   assertFiniteFloat(float("inf")) raises ValueError
     if not isinstance(x, numbers.Real): raise TypeError
     if isinstance(x,bool): raise TypeError
     if not isfinite(x): raise ValueError
 def assertFiniteInt(x: Any)->None:
+    # Verifies that x is a finite integer value.
+    # Inputs:
+    #   x: Any -> the value to validate as a finite integer
+    # Outputs:
+    #   None -> returns nothing if x is valid
+    # Preconditions:
+    #   x should be intended to represent an integer value
+    # Postconditions:
+    #   the function either finishes with no return value or raises an error
+    # Examples:
+    #   assertFiniteInt(5) returns None
+    #   assertFiniteInt(5.2) raises TypeError
     if not isinstance(x, numbers.Real): raise TypeError
     if isinstance(x,bool): raise TypeError
     if not isfinite(x): raise ValueError
@@ -27,6 +51,17 @@ class GlobeRect:
     east_long:float # the eastern longitude in degrees
     def __post_init__(self):
         # forces lo_lat < hi_lat and west_long < east_long
+        # Inputs:
+        #   self: GlobeRect -> the GlobeRect being validated after construction
+        # Outputs:
+        #   None -> returns nothing if all fields are valid
+        # Preconditions:
+        #   the dataclass fields have already been assigned
+        # Postconditions:
+        #   this GlobeRect has finite coordinates in valid latitude/longitude ranges
+        # Examples:
+        #   GlobeRect(10,20,30,40) passes validation
+        #   GlobeRect(95,20,30,40) raises ValueError
         assertFiniteFloat(self.lo_lat)
         assertFiniteFloat(self.hi_lat)
         assertFiniteFloat(self.west_long)
@@ -39,6 +74,17 @@ class GlobeRect:
         if self.lo_lat > self.hi_lat: error_message+=("the lower latitude is higher that the upper latitude")
         if (len(error_message) > 0): raise ValueError(error_message)
     def copy(self)->Self:
+        # Creates an identical GlobeRect.
+        # Inputs:
+        #   self: GlobeRect -> the GlobeRect to copy
+        # Outputs:
+        #   Self -> a new GlobeRect with the same coordinate values
+        # Preconditions:
+        #   self is a valid GlobeRect
+        # Postconditions:
+        #   the returned GlobeRect is equal to self
+        # Examples:
+        #   GlobeRect(10,20,30,40).copy() returns GlobeRect(10,20,30,40)
         return type(self)(self.lo_lat,self.hi_lat,self.west_long,self.east_long)
         
 @dataclass(frozen=True)
@@ -49,12 +95,35 @@ class Region:
     name: str # a string with the name of the region (e.g., `"Tokyo"`)
     terrain: str # a string representing the terrain type — one of: ocean, mountains, forest, or other
     def __post_init__(self):
+        # Validates the contents of a Region after construction.
+        # Inputs:
+        #   self: Region -> the Region being validated after construction
+        # Outputs:
+        #   None -> returns nothing if all fields are valid
+        # Preconditions:
+        #   the dataclass fields have already been assigned
+        # Postconditions:
+        #   this Region has a GlobeRect, a string name, and an allowed terrain
+        # Examples:
+        #   Region(GlobeRect(0,10,10,20),"Tokyo","other") passes validation
+        #   Region(GlobeRect(0,10,10,20),"Tokyo","desert") raises ValueError
         allowableTerrains = {"mountains","ocean","forest","other"}
         if not self.terrain in allowableTerrains: raise ValueError
         if not isinstance(self.name,str): raise TypeError
         if not isinstance(self.rect,GlobeRect): raise TypeError
         if not isinstance(self.terrain,str): raise TypeError
     def copy(self)->Self:
+        # Creates an identical Region.
+        # Inputs:
+        #   self: Region -> the Region to copy
+        # Outputs:
+        #   Self -> a new Region with the same field values
+        # Preconditions:
+        #   self is a valid Region
+        # Postconditions:
+        #   the returned Region is equal to self
+        # Examples:
+        #   Region(GlobeRect(0,10,10,20),"Tokyo","other").copy() returns an equal Region
         return type(self)(self.rect.copy(),self.name,self.terrain)
 @dataclass(frozen=True)
 class RegionCondition:
@@ -65,11 +134,34 @@ class RegionCondition:
     pop: int # the population in that year (as an integer)
     ghg_rate: float # the greenhouse gas emissions for that year (as a float, in tons of CO₂-equivalent per year)
     def __post_init__(self):
+        # Validates the contents of a RegionCondition after construction.
+        # Inputs:
+        #   self: RegionCondition -> the RegionCondition being validated after construction
+        # Outputs:
+        #   None -> returns nothing if all fields are valid
+        # Preconditions:
+        #   the dataclass fields have already been assigned
+        # Postconditions:
+        #   this RegionCondition has a Region, integer year/pop, and finite ghg_rate
+        # Examples:
+        #   RegionCondition(Region(GlobeRect(0,10,10,20),"A","other"),2024,100,50.0) passes validation
+        #   RegionCondition(Region(GlobeRect(0,10,10,20),"A","other"),2024,1.5,50.0) raises TypeError
         if not isinstance(self.region,Region): raise TypeError
         assertFiniteInt(self.year)
         assertFiniteInt(self.pop)
         assertFiniteFloat(self.ghg_rate)
     def copy(self)->Self:
+        # Creates an identical RegionCondition.
+        # Inputs:
+        #   self: RegionCondition -> the RegionCondition to copy
+        # Outputs:
+        #   Self -> a new RegionCondition with the same field values
+        # Preconditions:
+        #   self is a valid RegionCondition
+        # Postconditions:
+        #   the returned RegionCondition is equal to self
+        # Examples:
+        #   RegionCondition(Region(GlobeRect(0,10,10,20),"A","other"),2024,100,50.0).copy() returns an equal RegionCondition
         return type(self)(self.region.copy(),self.year,self.pop,self.ghg_rate)
     
 # Create **four instances** of `RegionCondition`. These will be used to test your functions in later tasks.
@@ -115,6 +207,13 @@ def emissions_per_capita(rc: RegionCondition)-> float:
     # Outputs:
     #   float -> a float that indicates the tons of CO₂-equivalent emitted per person in the region per year
     #         -> returns 0 if the population in the region is 0
+    # Preconditions:
+    #   rc must be a RegionCondition
+    # Postconditions:
+    #   returns 0.0 when rc.pop is 0, otherwise returns rc.ghg_rate / rc.pop
+    # Examples:
+    #   emissions_per_capita(RegionCondition(Region(GlobeRect(0,10,10,20),"A","other"),2024,100,50.0)) returns 0.5
+    #   emissions_per_capita(RegionCondition(Region(GlobeRect(0,10,10,20),"A","other"),2024,0,50.0)) returns 0.0
     if not isinstance(rc,RegionCondition): raise TypeError
     pop: int = rc.pop
     if (pop==0): return 0.0
@@ -126,6 +225,13 @@ def area(gr: GlobeRect)-> float:
     #   gr: GlobeRect -> the GlobeRectangle that the function will use to calculate the square kilometers
     # Outputs:
     #   float -> a float that is equivalent to the number of square kilometers inside of the GlobeRect that was passed as an input
+    # Preconditions:
+    #   gr must be a GlobeRect with valid latitude and longitude values
+    # Postconditions:
+    #   returns the spherical surface area in square kilometers for gr
+    # Examples:
+    #   area(GlobeRect(0,10,10,20)) returns a positive float
+    #   area(GlobeRect(40,40,-6,5)) returns 0.0
     
     if not isinstance(gr, GlobeRect): raise TypeError
     long_term: float =  gr.east_long - gr.west_long
@@ -141,6 +247,13 @@ def emissions_per_square_km(rc: RegionCondition)->float:
     #   rc: RegionCondition -> the RegionCondition used to calculate the number of tons of CO2 per square kilometer
     # Outputs:
     #   float -> a float equivalent to the number of tons of CO2 equivalent released per square kilometer in the given RegionCondition 
+    # Preconditions:
+    #   rc must be a RegionCondition
+    # Postconditions:
+    #   returns 0 when the region area is 0, otherwise returns rc.ghg_rate / area(rc.region.rect)
+    # Examples:
+    #   emissions_per_square_km(RegionCondition(Region(GlobeRect(0,10,10,20),"A","other"),2024,100,50.0)) returns 50.0 / area(GlobeRect(0,10,10,20))
+    #   emissions_per_square_km(RegionCondition(Region(GlobeRect(0,0,10,20),"A","other"),2024,100,50.0)) returns 0
     if not isinstance(rc,RegionCondition): raise TypeError
     a = area(rc.region.rect)
     if (a == 0): return 0
@@ -151,6 +264,13 @@ def densest(rc_list : list[RegionCondition])->str:
     #   rc_list: list[RegionCondition] -> a list of Region Conditions to be evaluated for the highest population density
     # Outputs:
     #   str -> the name of the Region with the highest population density.
+    # Preconditions:
+    #   rc_list must be a non-empty list of RegionCondition values
+    # Postconditions:
+    #   returns the name of the RegionCondition with the greatest population divided by area
+    # Examples:
+    #   densest([cal_poly]) returns "Cal Poly"
+    #   densest([]) raises IndexError
     if (len(rc_list) ==0): raise IndexError
     return rc_list[densest_recursive(rc_list, -inf, 0, 0)].region.name
 def densest_recursive(rc_list: list[RegionCondition], highest_density : float,highest_density_index: int, index : int)-> int:
@@ -162,29 +282,71 @@ def densest_recursive(rc_list: list[RegionCondition], highest_density : float,hi
     #   index: int -> the index of the element in rc_list that will be compared against the highest_density to see if this element actually has the highest population density
     # Outputs:
     #   int -> the index of the RegionCondition in rc_list that has the highest population density
+    # Preconditions:
+    #   rc_list must be a list, highest_density must represent the best density seen so far, and index must be the current position being checked
+    # Postconditions:
+    #   returns the index of the densest RegionCondition in rc_list
+    # Examples:
+    #   densest_recursive([cal_poly], -inf, 0, 0) returns 0
+    #   densest_recursive(region_conditions, -inf, 0, 0) returns the index of the densest region
     if (index >= len(rc_list)): 
         return highest_density_index
     if (not isinstance(rc_list[index],RegionCondition)): raise TypeError
     if (len(rc_list) ==0): raise IndexError
-    current_density = rc_list[index].pop / area(rc_list[index].region.rect)
+    A = area(rc_list[index].region.rect)
+    if A == 0: 
+        current_density = 0.0
+    else:
+        current_density = rc_list[index].pop / A
     if (current_density > highest_density): 
         highest_density = current_density
         highest_density_index = index
     return densest_recursive(rc_list,highest_density,highest_density_index,index+1)
+
+
 terrain_to_growth_rate_map: dict[str,float] = {}
 terrain_to_growth_rate_map["ocean"] = 0.0001
 terrain_to_growth_rate_map["mountains"] = 0.0005
 terrain_to_growth_rate_map["forest"] = -0.00001
 terrain_to_growth_rate_map["other"] = 0.0003
 def project_condition(rc : RegionCondition, years: int)->RegionCondition:
+    # Projects a RegionCondition forward by a certain number of years using terrain-based growth.
+    # Inputs:
+    #   rc: RegionCondition -> the starting RegionCondition to project forward
+    #   years: int -> the number of years to project into the future
+    # Outputs:
+    #   RegionCondition -> a new projected RegionCondition after the requested number of years
+    # Preconditions:
+    #   rc must be a RegionCondition and years must be an integer greater than or equal to 0
+    # Postconditions:
+    #   returns a new RegionCondition with the same region, updated year, updated population, and proportionally updated ghg_rate
+    # Examples:
+    #   project_condition(cal_poly,0) returns a RegionCondition equal to cal_poly
+    #   project_condition(cal_poly,10) returns a RegionCondition with year 10 years later
+    if years <0: raise ValueError
     if not isinstance(rc,RegionCondition): raise TypeError
     if not isinstance(years,int): raise TypeError
     growth_multiplier = growth(terrain_to_growth_rate_map,rc.region.terrain,years)
     pop = int(rc.pop * growth_multiplier)
+    if pop <0: pop = 0
     ghg = rc.ghg_rate * growth_multiplier
     return RegionCondition(rc.region.copy(),rc.year+years,pop,ghg)
 
 def growth(growth_rate_map: dict[str,float], terrain: str, years: int)->float:
+    # Computes the compounded population/emissions multiplier for a terrain over a number of years.
+    # Inputs:
+    #   growth_rate_map: dict[str,float] -> maps each terrain to its annual growth rate
+    #   terrain: str -> the terrain whose growth rate will be used
+    #   years: int -> the number of years of compounding
+    # Outputs:
+    #   float -> the compounded growth multiplier for the given terrain and years
+    # Preconditions:
+    #   growth_rate_map must be a dictionary, terrain must be a key in the map, and years must be a finite integer
+    # Postconditions:
+    #   returns (1+growth_rate_map[terrain]) ** years
+    # Examples:
+    #   growth(terrain_to_growth_rate_map,"mountains",0) returns 1.0
+    #   growth(terrain_to_growth_rate_map,"other",10) returns a positive float
     if not isinstance(growth_rate_map,dict): raise TypeError
     if not isinstance(terrain,str): raise TypeError
     assertFiniteInt(years)
