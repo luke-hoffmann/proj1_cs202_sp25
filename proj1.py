@@ -2,17 +2,21 @@
 import sys
 from dataclasses import dataclass
 from math import pi, inf, sin,isfinite
-from typing import Any, Self
+from typing import Any, Self, Literal
 
 import numbers
 sys.setrecursionlimit(10**6)
 DEGREES_TO_RADIANS: float = pi / 180
 EARTH_RADIUS: float = 6378.1 # km
-def assertFinite(x : Any)->None:
+def assertFiniteFloat(x : Any)->None:
     if not isinstance(x, numbers.Real): raise TypeError
     if isinstance(x,bool): raise TypeError
     if not isfinite(x): raise ValueError
-
+def assertFiniteInt(x: Any)->None:
+    if not isinstance(x, numbers.Real): raise TypeError
+    if isinstance(x,bool): raise TypeError
+    if not isfinite(x): raise ValueError
+    if not isinstance(x,int): raise TypeError
 @dataclass(frozen=True)
 class GlobeRect:
     # Represents a rectangular region of the globe.
@@ -23,10 +27,10 @@ class GlobeRect:
     east_long:float # the eastern longitude in degrees
     def __post_init__(self):
         # forces lo_lat < hi_lat and west_long < east_long
-        assertFinite(self.lo_lat)
-        assertFinite(self.hi_lat)
-        assertFinite(self.west_long)
-        assertFinite(self.east_long)
+        assertFiniteFloat(self.lo_lat)
+        assertFiniteFloat(self.hi_lat)
+        assertFiniteFloat(self.west_long)
+        assertFiniteFloat(self.east_long)
         error_message = ""
         if abs(self.lo_lat) >90: error_message+=("lo_lat must be between -90 and 90")
         if abs(self.hi_lat) >90: error_message+=("hi_lat must be between -90 and 90")
@@ -44,7 +48,12 @@ class Region:
     rect: GlobeRect # a `GlobeRect` object describing the physical boundaries
     name: str # a string with the name of the region (e.g., `"Tokyo"`)
     terrain: str # a string representing the terrain type — one of: ocean, mountains, forest, or other
-    
+    def __post_init__(self):
+        allowableTerrains = {"mountains","ocean","forest","other"}
+        if not self.terrain in allowableTerrains: raise ValueError
+        if not isinstance(self.name,str): raise TypeError
+        if not isinstance(self.rect,GlobeRect): raise TypeError
+        if not isinstance(self.terrain,str): raise TypeError
     def copy(self)->Self:
         return type(self)(self.rect.copy(),self.name,self.terrain)
 @dataclass(frozen=True)
@@ -55,6 +64,11 @@ class RegionCondition:
     year: int # the year of observation (as an integer)
     pop: int # the population in that year (as an integer)
     ghg_rate: float # the greenhouse gas emissions for that year (as a float, in tons of CO₂-equivalent per year)
+    def __post_init__(self):
+        if not isinstance(self.region,Region): raise TypeError
+        assertFiniteInt(self.year)
+        assertFiniteInt(self.pop)
+        assertFiniteFloat(self.ghg_rate)
     def copy(self)->Self:
         return type(self)(self.region.copy(),self.year,self.pop,self.ghg_rate)
     
@@ -101,6 +115,7 @@ def emissions_per_capita(rc: RegionCondition)-> float:
     # Outputs:
     #   float -> a float that indicates the tons of CO₂-equivalent emitted per person in the region per year
     #         -> returns 0 if the population in the region is 0
+    if not isinstance(rc,RegionCondition): raise TypeError
     pop: int = rc.pop
     if (pop==0): return 0.0
     return rc.ghg_rate/pop
@@ -112,7 +127,7 @@ def area(gr: GlobeRect)-> float:
     # Outputs:
     #   float -> a float that is equivalent to the number of square kilometers inside of the GlobeRect that was passed as an input
     
-    
+    if not isinstance(gr, GlobeRect): raise TypeError
     long_term: float =  gr.east_long - gr.west_long
     lat_term: float = abs(sin(gr.hi_lat * DEGREES_TO_RADIANS) - sin(gr.lo_lat * DEGREES_TO_RADIANS))
     if (long_term < 0): long_term += 360
@@ -126,6 +141,7 @@ def emissions_per_square_km(rc: RegionCondition)->float:
     #   rc: RegionCondition -> the RegionCondition used to calculate the number of tons of CO2 per square kilometer
     # Outputs:
     #   float -> a float equivalent to the number of tons of CO2 equivalent released per square kilometer in the given RegionCondition 
+    if not isinstance(rc,RegionCondition): raise TypeError
     a = area(rc.region.rect)
     if (a == 0): return 0
     return rc.ghg_rate / a
@@ -162,12 +178,16 @@ terrain_to_growth_rate_map["forest"] = -0.00001
 terrain_to_growth_rate_map["other"] = 0.0003
 def project_condition(rc : RegionCondition, years: int)->RegionCondition:
     if not isinstance(rc,RegionCondition): raise TypeError
+    if not isinstance(years,int): raise TypeError
     growth_multiplier = growth(terrain_to_growth_rate_map,rc.region.terrain,years)
     pop = int(rc.pop * growth_multiplier)
     ghg = rc.ghg_rate * growth_multiplier
     return RegionCondition(rc.region.copy(),rc.year+years,pop,ghg)
 
 def growth(growth_rate_map: dict[str,float], terrain: str, years: int)->float:
+    if not isinstance(growth_rate_map,dict): raise TypeError
+    if not isinstance(terrain,str): raise TypeError
+    assertFiniteInt(years)
     if not terrain in growth_rate_map: raise KeyError
     growth_rate = growth_rate_map[terrain]
     return (1+growth_rate) ** years

@@ -31,10 +31,10 @@ class TestGlobeRect(unittest.TestCase):
         
         # cannot pass str as float
         self.assertRaises(TypeError, lambda: GlobeRect("cheese",20,30,20))
-        
+        self.assertRaises(TypeError, lambda: GlobeRect(10,"wow",30,20))
         # cannot pass bool as float
         self.assertRaises(TypeError, lambda: GlobeRect(False,20,30,20))
-        
+        self.assertRaises(TypeError, lambda: GlobeRect(10,20,False,20))
         # cannot pass infinity as it is not finite
         self.assertRaises(ValueError, lambda: GlobeRect(float("inf"),20,30,20))
 class TestEmissionsPerCapita(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestEmissionsPerCapita(unittest.TestCase):
         gc = GlobeRect(0,10,10,20)
         region = Region(gc,"Ocean","ocean")
         rc = RegionCondition(region,2020,0,1500)
-        self.assertEqual(emissions_per_capita(rc),0)
+        self.assertEqual(emissions_per_capita(rc),0)1
 class TestEmissionsPerSquareKm(unittest.TestCase):
     def test_typical(self):
         # test that emissions per square km is properly calculated under normal conditions
@@ -97,7 +97,7 @@ class TestArea(unittest.TestCase):
         expected_area = lat_term * long_term * self.EARTH_RADIUS_SQUARED
         self.assertAlmostEqual(area(gr),expected_area,3)
         
-    def test_long_across_180_line(self):
+    def test_across_180_line(self):
         # test a GlobeRect where the longitudes cross the 180 degree line
         low_lat = -20
         hi_lat= 40
@@ -121,11 +121,11 @@ class TestDensest(unittest.TestCase):
         second_major_metro_region = Region(second_major_metro_globerect,"Mumbai", "other")
         second_major_metro = RegionCondition(second_major_metro_region,2024,25300000,5.6e7)
 
-        south_china_sea_globerect = GlobeRect(12.061978,18.038351,117.376528,110.967700)
+        south_china_sea_globerect = GlobeRect(12.061978,18.038351,110.967700,117.376528)
         south_china_sea_region = Region(south_china_sea_globerect,"South China Sea", "ocean")
         south_china_sea = RegionCondition(south_china_sea_region,2024,0,2.0e10)
 
-        cal_poly_globerect = GlobeRect(35.238162,35.324984,-120.609130,-120.710445,)
+        cal_poly_globerect = GlobeRect(35.238162,35.324984,-120.710445,-120.609130)
         cal_poly_region = Region(cal_poly_globerect,"Cal Poly","mountains")
         cal_poly = RegionCondition(cal_poly_region,2024,47000,4.7e5)
         region_conditions = [major_metro,second_major_metro,south_china_sea,cal_poly]
@@ -153,10 +153,14 @@ class TestProjectCondition(unittest.TestCase):
         region = Region(GlobeRect(0,10,10,20),"China","mountains")
         rc_starting = RegionCondition(region,starting_year,starting_pop,starting_ghg)
         rc_expected = RegionCondition(region,ending_year,ending_pop,ending_ghg)
+        
+        # test that the year was correctly set
         self.assertEqual(project_condition(rc_starting,years_forward).year, ending_year)
+        # test that the RegionCondition was accurately created
         self.assertEqual(project_condition(rc_starting,years_forward),rc_expected)
     def test_edge_cases(self):
         self.assertRaises(TypeError,lambda: project_condition("string",10))
-        self.assertRaises(KeyError, lambda: project_condition(RegionCondition(Region(GlobeRect(0,10,10,30),"China","Ocean Floor"),2020,20000,100),10))
+        self.assertRaises(ValueError, lambda: project_condition(RegionCondition(Region(GlobeRect(0,10,10,30),"China","Ocean Floor"),2020,20000,100),10))
+    
 if __name__ == '__main__':
     unittest.main()
